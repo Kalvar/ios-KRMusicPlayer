@@ -1,12 +1,20 @@
-## Supports
+//
+//  ViewController.m
+//  KRMusicPlayerSample
+//
+//  Created by Kalvar on 13/9/13.
+//  Copyright (c) 2013年 Kuo-Ming Lin. All rights reserved.
+//
 
-KRMusicPlayer supports ARC.
+#import "ViewController.h"
+#import "KRMusicPlayer.h"
 
-## How To Get Started
+@interface ViewController ()
 
-KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
+@end
 
-``` objective-c
+@implementation ViewController
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -37,12 +45,11 @@ KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
         // ... 
     }
 }
-```
 
-## Version
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
-KRMusicPlayer now is V0.5 beta.
-
-## License
-
-KRMusicPlayer is available under the MIT license ( or Whatever you wanna do ). See the LICENSE file for more info.
+@end
