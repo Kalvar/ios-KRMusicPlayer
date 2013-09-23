@@ -27,8 +27,6 @@
  */
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    
-    
     UIApplication *app = [UIApplication sharedApplication];
     __block UIBackgroundTaskIdentifier bgTask;
     bgTask = [app beginBackgroundTaskWithExpirationHandler:^{
