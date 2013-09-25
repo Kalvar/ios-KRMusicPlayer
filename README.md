@@ -95,6 +95,11 @@ KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
         [_outAlbumNameLabel setText:_playingAlbum];
         [_outSongLengthLabel setText:[NSString stringWithFormat:@"%@", [[NSNumber numberWithFloat:_playingTimeLength] stringValue]]];
         
+        //Save the Song that you can use [_musicPlayer playSavedSongLists] to play the saved songs.
+        [_musicPlayer savePlaylistWithPersistentId:itemPersistentId];
+        //You can use this method to get all saved songs.
+        //NSDictionary *_savedSongs = [_musicPlayer getSavedSongLists];
+        
     }];
     
     __weak UILabel *_outSongVolumeLabel = outSongVolumeLabel;
@@ -146,6 +151,11 @@ KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
 {
     //上一首歌 ( Previous Song. )
     [musicPlayer previousSong];
+}
+
+-(IBAction)playLists:(id)sender
+{
+    [musicPlayer playSavedSongLists];
 }
 ```
 

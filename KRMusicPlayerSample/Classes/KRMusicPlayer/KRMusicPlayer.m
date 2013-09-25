@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.m
-//  V0.65 Beta
+//  V0.6.7 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013年 Kuo-Ming Lin. All rights reserved.
@@ -8,9 +8,73 @@
 
 #import "KRMusicPlayer.h"
 
+static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
+
 
 @interface KRMusicPlayer ()
 
+
+@end
+
+@implementation KRMusicPlayer (fixDefaults)
+
+#pragma --mark Gets NSDefault Values
+/*
+ * @ 取出萬用型態
+ */
+-(id)_defaultValueForKey:(NSString *)_key
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:_key];
+}
+
+/*
+ * @ 取出 String
+ */
+-(NSString *)_defaultStringValueForKey:(NSString *)_key
+{
+    return [NSString stringWithFormat:@"%@", [self _defaultValueForKey:_key]];
+}
+
+/*
+ * @ 取出 BOOL
+ */
+-(BOOL)_defaultBoolValueForKey:(NSString *)_key
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:_key];
+}
+
+#pragma --mark Saves NSDefault Values
+/*
+ * @ 儲存萬用型態
+ */
+-(void)_saveDefaultValue:(id)_value forKey:(NSString *)_forKey
+{
+    [[NSUserDefaults standardUserDefaults] setObject:_value forKey:_forKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+/*
+ * @ 儲存 String
+ */
+-(void)_saveDefaultValueForString:(NSString *)_value forKey:(NSString *)_forKey
+{
+    [self _saveDefaultValue:_value forKey:_forKey];
+}
+
+/*
+ * @ 儲存 BOOL
+ */
+-(void)_saveDefaultValueForBool:(BOOL)_value forKey:(NSString *)_forKey
+{
+    [self _saveDefaultValue:[NSNumber numberWithBool:_value] forKey:_forKey];
+}
+
+#pragma --mark Removes NSDefault Values
+-(void)_removeDefaultValueForKey:(NSString *)_key
+{
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:_key];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
 
 @end
 
@@ -244,6 +308,63 @@
 -(CGFloat)getPlayingSongDuration
 {
     return [[_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyPlaybackDuration] floatValue];
+}
+
+//儲存歌曲
+-(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId
+{
+    NSData *_playListsData          = [self _defaultValueForKey:_kKRMusicPlayerSongList];
+    NSMutableDictionary *_playLists = [NSMutableDictionary dictionaryWithCapacity:0];
+    if( _playListsData )
+    {
+        _playLists = (NSMutableDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:_playListsData];
+        //已存在該歌曲 ( It saved. )
+        if( [_playLists objectForKey:_persistenId] )
+        {
+            return NO;
+        }
+    }
+    [_playLists setObject:[NSNumber numberWithLongLong:[_persistenId longLongValue]] forKey:_persistenId];
+    NSData *_archivedData = [NSKeyedArchiver archivedDataWithRootObject:_playLists];
+    [self _saveDefaultValue:_archivedData forKey:_kKRMusicPlayerSongList];
+    return YES;
+}
+
+//播放儲存的歌曲列表
+-(void)playSavedSongLists
+{
+    NSData *_playListsData = [self _defaultValueForKey:_kKRMusicPlayerSongList];
+    if( _playListsData )
+    {
+        NSMutableDictionary *_playLists = (NSMutableDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:_playListsData];
+        //NSLog(@"_playLists : %@", _playLists);
+        NSMutableArray *_songs          = [[NSMutableArray alloc] initWithCapacity:0];
+        [_playLists enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop)
+        {
+            NSNumber *_persistenId   = (NSNumber *)key;
+            //NSLog(@"_persistenId : %@", _persistenId);
+            MPMediaQuery *_songQuery = [MPMediaQuery songsQuery];
+            [_songQuery addFilterPredicate:[MPMediaPropertyPredicate predicateWithValue:_persistenId
+                                                                            forProperty:MPMediaItemPropertyPersistentID]];
+            [_songs addObjectsFromArray:[_songQuery items]];
+        }];
+        //NSLog(@"_songs : %@\n\n", _songs);
+        MPMediaItemCollection *_currentItemCollection = [[MPMediaItemCollection alloc] initWithItems:_songs];
+        [self.musicPlayer setQueueWithItemCollection:_currentItemCollection];
+        [self stop];
+        [self play];
+    }
+}
+
+//取得儲存的歌曲列表
+-(NSDictionary *)getSavedSongLists
+{
+    NSData *_playListsData = [self _defaultValueForKey:_kKRMusicPlayerSongList];
+    if( _playListsData )
+    {
+        return (NSDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:_playListsData];
+    }
+    return nil;
 }
 
 #pragma --mark Getters

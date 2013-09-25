@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.h
-//  V0.65 Beta
+//  V0.6.7 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013年 Kuo-Ming Lin. All rights reserved.
@@ -53,6 +53,8 @@
 -(NSString *)getPlayingSong;
 -(NSString *)getPlayingAlbum;
 -(CGFloat)getPlayingSongDuration;
-
+-(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId;
+-(void)playSavedSongLists;
+-(NSDictionary *)getSavedSongLists;
 
 @end
