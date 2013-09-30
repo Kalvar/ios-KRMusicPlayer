@@ -154,4 +154,9 @@
     [musicPlayer playSavedSongLists];
 }
 
+-(IBAction)playMusic:(id)sender
+{
+    [musicPlayer playSongWithPersistenId:@"persistenId of song."];
+}
+
 @end

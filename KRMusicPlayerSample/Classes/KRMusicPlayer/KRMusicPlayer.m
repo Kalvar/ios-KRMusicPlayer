@@ -313,18 +313,30 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 //儲存歌曲
 -(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId
 {
+    return [self savePlaylistWithPersistentId:_persistenId songInfo:nil];
+}
+
+//儲存歌曲與自訂的 Info
+-(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId songInfo:(NSDictionary *)_songInfo
+{
     NSData *_playListsData          = [self _defaultValueForKey:_kKRMusicPlayerSongList];
     NSMutableDictionary *_playLists = [NSMutableDictionary dictionaryWithCapacity:0];
     if( _playListsData )
     {
         _playLists = (NSMutableDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:_playListsData];
-        //已存在該歌曲 ( It saved. )
         if( [_playLists objectForKey:_persistenId] )
         {
             return NO;
         }
     }
-    [_playLists setObject:[NSNumber numberWithLongLong:[_persistenId longLongValue]] forKey:_persistenId];
+    if( _songInfo )
+    {
+        [_playLists setObject:_songInfo forKey:_persistenId];
+    }
+    else
+    {
+        [_playLists setObject:[NSNumber numberWithLongLong:[_persistenId longLongValue]] forKey:_persistenId];
+    }
     NSData *_archivedData = [NSKeyedArchiver archivedDataWithRootObject:_playLists];
     [self _saveDefaultValue:_archivedData forKey:_kKRMusicPlayerSongList];
     return YES;
@@ -354,6 +366,18 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
         [self stop];
         [self play];
     }
+}
+
+//依照歌曲 ID 播放歌曲
+-(void)playSongWithPersistenId:(NSString *)_persistenId
+{
+    MPMediaQuery *_songQuery = [MPMediaQuery songsQuery];
+    [_songQuery addFilterPredicate:[MPMediaPropertyPredicate predicateWithValue:(NSNumber *)_persistenId
+                                                                    forProperty:MPMediaItemPropertyPersistentID]];
+    MPMediaItemCollection *_currentItemCollection = [[MPMediaItemCollection alloc] initWithItems:@[[_songQuery items]]];
+    [self.musicPlayer setQueueWithItemCollection:_currentItemCollection];
+    [self stop];
+    [self play];
 }
 
 //取得儲存的歌曲列表

@@ -54,7 +54,9 @@
 -(NSString *)getPlayingAlbum;
 -(CGFloat)getPlayingSongDuration;
 -(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId;
+-(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId songInfo:(NSDictionary *)_songInfo;
 -(void)playSavedSongLists;
+-(void)playSongWithPersistenId:(NSString *)_persistenId;
 -(NSDictionary *)getSavedSongLists;
 
 @end
