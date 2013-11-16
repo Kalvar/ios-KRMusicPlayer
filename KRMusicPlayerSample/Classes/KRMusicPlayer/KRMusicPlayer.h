@@ -58,5 +58,6 @@
 -(void)playSavedSongLists;
 -(void)playSongWithPersistenId:(NSString *)_persistenId;
 -(NSDictionary *)getSavedSongLists;
+-(void)turnOnRepeatMode;
 
 @end

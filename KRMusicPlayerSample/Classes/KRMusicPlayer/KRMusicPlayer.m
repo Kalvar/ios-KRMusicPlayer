@@ -242,8 +242,11 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 //播放
 -(void)play
 {
-    [_musicPlayer prepareToPlay];
-    [_musicPlayer play];
+    if( !self.isPlaying )
+    {
+        [_musicPlayer prepareToPlay];
+        [_musicPlayer play];
+    }
 }
 
 //播放並繼續執行通知
@@ -389,6 +392,12 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
         return (NSDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:_playListsData];
     }
     return nil;
+}
+
+//開啟歌曲循環模式
+-(void)turnOnRepeatMode
+{
+    self.musicPlayer.repeatMode = MPMusicRepeatModeAll;
 }
 
 #pragma --mark Getters
