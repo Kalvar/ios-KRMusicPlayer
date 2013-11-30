@@ -298,19 +298,31 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 //取得正在播放歌名
 -(NSString *)getPlayingSong
 {
-    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyTitle];
+    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyTitle] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyTitle] : @"";
 }
 
 //取得正在播放專輯
 -(NSString *)getPlayingAlbum
 {
-    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle];
+    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] : @"";
 }
 
-//取得正在播放的歌曲總播放時間長度 ( 秒 )
+//取得正在播放的歌曲總播放時間長度 ( 歌曲長度 ; 秒 )
 -(CGFloat)getPlayingSongDuration
 {
     return [[_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyPlaybackDuration] floatValue];
+}
+
+//取得當前歌曲目前正播放到第幾秒的位置
+-(CGFloat)getPlayingSongCurrentTime
+{
+    return _musicPlayer.currentPlaybackTime ? _musicPlayer.currentPlaybackTime : 0.0f;
+}
+
+//取得演唱者
+-(NSString *)getSonger
+{
+    return [_musicPlayer.nowPlayingItem valueForKey:MPMediaItemPropertyAlbumArtist] ? [_musicPlayer.nowPlayingItem valueForKey:MPMediaItemPropertyAlbumArtist] : @"";
 }
 
 //儲存歌曲
