@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.m
-//  V0.6.7 Beta
+//  V0.7.0 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013年 Kuo-Ming Lin. All rights reserved.
@@ -192,24 +192,163 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 
 @end
 
+@implementation KRMusicPlayer (PlayerFetchs)
+
+//喚醒播放器
+-(void)awakePlayer
+{
+    if( !self.isPlayerWoke )
+    {
+        MPMediaQuery *_songsQuery = [MPMediaQuery songsQuery];
+        
+        //設置播放器的歌曲佇列
+        [self.musicPlayer setQueueWithQuery:_songsQuery];
+        //[self.musicPlayer setQueueWithItemCollection:[MPMediaItemCollection collectionWithItems:[_songsQuery items]]];
+        
+        NSArray *_songs = [_songsQuery items];
+        for (MPMediaItem *_eachSong in _songs)
+        {
+            /*
+             //今天再試試這樣行不行，用這裡方法的原因，是因為 Watch 在初始選擇 Music Icon 時，手機竟然發出了極短的音樂聲 ... ( 這不對 XD )
+             CGFloat _sourceValume = _musicPlayer.volume;
+             //靜音喚醒
+             [self setValume:0.0f];
+             _musicPlayer.nowPlayingItem = _eachSong;
+             [self stopMusic];
+             //寫回原音量
+             [self setValume:_sourceValume];
+             */
+            self.musicPlayer.nowPlayingItem = _eachSong;
+            break;
+        }
+    }
+}
+
+//取得所有的專輯資訊
+-(NSArray *)fetchAllAlbums
+{
+    return [self fetchAllAlbumsWithinImageSize:CGSizeMake(0.0f, 0.0f)];
+}
+
+//取得所有專輯資訊，並且限定專輯圖片的呎吋
+-(NSArray *)fetchAllAlbumsWithinImageSize:(CGSize)_imageSize
+{
+    BOOL _isFullSize = ( _imageSize.width > 0.0f && _imageSize.height > 0.0f );
+    NSMutableArray *_albums = [[NSMutableArray alloc] initWithCapacity:0];
+    //取得全部歌曲
+    MPMediaQuery *_mediaQuery = [MPMediaQuery albumsQuery];
+    NSArray *_items = [_mediaQuery items];
+    NSMutableDictionary *_ignores = [NSMutableDictionary dictionaryWithCapacity:0];
+    for (MPMediaItem *_eachAlbum in _items)
+    {
+        NSNumber *_albumId = [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumPersistentID];
+        //已經取出過的資料就忽略
+        if( [_ignores objectForKey:_albumId] )
+        {
+            continue;
+        }
+        //取得專輯圖片
+        MPMediaItemArtwork *_artwork = [_eachAlbum valueForProperty:MPMediaItemPropertyArtwork];
+        CGSize _theSize              = ( _isFullSize ) ? _artwork.bounds.size : _imageSize;
+        UIImage *_albumFullImage     = [_artwork imageWithSize:_theSize]; //[_artwork imageWithSize:CGSizeMake(120.0f, 120.0f)];
+        
+        NSDictionary *_albumInfo = @{@"id"        : _albumId,
+                                     @"name"      : [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumTitle],
+                                     @"fullImage" : _albumFullImage};
+        [_albums addObject:_albumInfo];
+        [_ignores setObject:_albumId forKey:_albumId];
+    }
+    return _albums;
+}
+
+//依照 Query 設定集合來取得所有的歌曲
+-(NSArray *)fetchSongsWithQuery:(MPMediaQuery *)_query
+{
+    NSMutableArray *_songs = [[NSMutableArray alloc] initWithCapacity:0];
+    MPMediaQuery *_mediaQuery= nil;
+    //取得該 Query 底下的全部歌曲
+    if( _query )
+    {
+        _mediaQuery = _query;
+    }
+    else
+    {
+        //取得全部歌曲
+        //_mediaQuery = [[MPMediaQuery alloc] init];
+        _mediaQuery = [MPMediaQuery songsQuery];
+    }
+    NSArray *_items = [_mediaQuery items];
+    for (MPMediaItem *_eachSong in _items)
+    {
+        /*
+         * @ 屬性說明
+         *   - MPMediaItemPropertyAlbumPersistentID       : 專輯 ID       ( NSNumber, longlongValue )
+         *   - MPMediaItemPropertyAlbumArtistPersistentID : 專輯的歌手 ID  ( NSNumber, longlongValue )
+         */
+        NSDictionary *_songInfo = @{@"songId"    : [_eachSong valueForProperty:MPMediaItemPropertyPersistentID],
+                                    @"songName"  : [_eachSong valueForProperty:MPMediaItemPropertyTitle],
+                                    @"songer"    : [_eachSong valueForProperty:MPMediaItemPropertyAlbumArtist],
+                                    @"albumId"   : [_eachSong valueForProperty:MPMediaItemPropertyAlbumPersistentID],
+                                    @"albumName" : [_eachSong valueForProperty:MPMediaItemPropertyAlbumTitle]};
+        [_songs addObject:_songInfo];
+    }
+    return _songs;
+}
+
+//依照 Album Id 取出該 Album 底下的所有歌曲
+-(NSArray *)fetchAlbumSongsWithAlbumId:(NSNumber *)_albumId
+{
+    MPMediaPropertyPredicate *_predicate = [MPMediaPropertyPredicate predicateWithValue:_albumId
+                                                                            forProperty:MPMediaItemPropertyAlbumPersistentID];
+    MPMediaQuery *_songsQuery = [MPMediaQuery songsQuery];
+    [_songsQuery addFilterPredicate:_predicate];
+    return [self fetchSongsWithQuery:_songsQuery];
+}
+
+//取得所有歌曲
+-(NSArray *)fetchAllSongs
+{
+    return [self fetchSongsWithQuery:nil];
+}
+
+@end
+
+@implementation KRMusicPlayer (PlayerQueueQuery)
+
+//設定播放器的播放砍曲隊列，之後就能直接播放音樂曲目 ( 可參考 wakePlayer 的方法 )
+-(void)setQueueWithQuery:(MPMediaQuery *)_mediaQuery
+{
+    [self.musicPlayer setQueueWithQuery:_mediaQuery];
+}
+
+//設定播放器的播放砍曲隊列，之後就能直接播放音樂曲目
+-(void)setQueueWithItemCollection:(MPMediaItemCollection *)_itemCollection
+{
+    [self.musicPlayer setQueueWithItemCollection:_itemCollection];
+}
+
+@end
+
 @implementation KRMusicPlayer
 
-@synthesize musicPlayer = _musicPlayer;
-@synthesize isPlaying   = _isPlaying;
-@synthesize isPause     = _isPause;
-@synthesize isStop      = _isStop;
-@synthesize volume      = _volume;
+@synthesize musicPlayer  = _musicPlayer;
+@synthesize isPlaying    = _isPlaying;
+@synthesize isPause      = _isPause;
+@synthesize isStop       = _isStop;
+@synthesize isPlayerWoke = _isPlayerWoke;
+@synthesize volume       = _volume;
 @synthesize playbackChangeHandler    = _playbackChangeHandler;
 @synthesize playingItemChangeHandler = _playingItemChangeHandler;
 @synthesize volumeChangeHandler      = _volumeChangeHandler;
 
 
-+(KRMusicPlayer *)sharedManager
++(instancetype)sharedManager
 {
     static dispatch_once_t pred;
     static KRMusicPlayer *_object = nil;
     dispatch_once(&pred, ^{
         _object = [[KRMusicPlayer alloc] init];
+        [_object initialize];
     });
     return _object;
 }
@@ -219,10 +358,7 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
     self = [super init];
     if( self )
     {
-        if( !_musicPlayer )
-        {
-            _musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
-        }
+        [self initialize];
     }
     return self;
 }
@@ -235,16 +371,30 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
         _musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
     }
     [self _initWithVars];
+    [self _unregisterNofications];
     [self _registerNotifcations];
 }
 
 #pragma --mark Player
+/*
+ * @ 準備播放
+ *   - 當 MusicPlayer ( 音樂播放器 ) 尚未啟動準備好可以播音樂時，
+ *     使用本函式即可啟動 MusicPlayer。
+ */
+-(void)preparedToPlay
+{
+    if( !_musicPlayer.isPreparedToPlay )
+    {
+        [_musicPlayer prepareToPlay];
+    }
+}
+
 //播放
 -(void)play
 {
     if( !self.isPlaying )
     {
-        [_musicPlayer prepareToPlay];
+        [self preparedToPlay];
         [_musicPlayer play];
     }
 }
@@ -295,14 +445,15 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
     [_musicPlayer skipToBeginning];
 }
 
+#pragma --mark Gets Infomation
 //取得正在播放歌名
--(NSString *)getPlayingSong
+-(NSString *)getPlayingSongName
 {
     return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyTitle] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyTitle] : @"";
 }
 
 //取得正在播放專輯
--(NSString *)getPlayingAlbum
+-(NSString *)getPlayingAlbumName
 {
     return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] : @"";
 }
@@ -320,11 +471,12 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 }
 
 //取得演唱者
--(NSString *)getSonger
+-(NSString *)getPlayingSonger
 {
-    return [_musicPlayer.nowPlayingItem valueForKey:MPMediaItemPropertyAlbumArtist] ? [_musicPlayer.nowPlayingItem valueForKey:MPMediaItemPropertyAlbumArtist] : @"";
+    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumArtist] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumArtist] : @"";
 }
 
+#pragma --mark Save Songs
 //儲存歌曲
 -(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId
 {
@@ -396,7 +548,7 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 }
 
 //取得儲存的歌曲列表
--(NSDictionary *)getSavedSongLists
+-(NSDictionary *)fetchtSavedSongLists
 {
     NSData *_playListsData = [self _defaultValueForKey:_kKRMusicPlayerSongList];
     if( _playListsData )
@@ -409,7 +561,7 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 //開啟歌曲循環模式
 -(void)turnOnRepeatMode
 {
-    self.musicPlayer.repeatMode = MPMusicRepeatModeAll;
+    _musicPlayer.repeatMode = MPMusicRepeatModeAll;
 }
 
 #pragma --mark Getters
@@ -426,6 +578,12 @@ static NSString *_kKRMusicPlayerSongList = @"_kKRMusicPlayerSongList";
 -(BOOL)isStop
 {
     return ( [_musicPlayer playbackState] == MPMusicPlaybackStateStopped );
+}
+
+-(BOOL)isPlayerWoke
+{
+    return ( [[self getPlayingSongName] length] > 0 );
+    //return ( [[self getPlayingSongName] length] > 0 && _musicPlayer.isPreparedToPlay && [self getPlayingSongDuration] > 0.0f );
 }
 
 -(CGFloat)volume

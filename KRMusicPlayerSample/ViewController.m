@@ -73,10 +73,10 @@
         NSLog(@"setPlayingItemChangeHandler : %@", itemPersistentId);
         
         //取得歌曲名稱 ( Fetchs Song Name of Playing. )
-        NSString *_playingSong = [_musicPlayer getPlayingSong];
+        NSString *_playingSong = [_musicPlayer getPlayingSongName];
         
         //取得專輯名稱 ( Fetchs Album Name of Playing. )
-        NSString *_playingAlbum = [_musicPlayer getPlayingAlbum];
+        NSString *_playingAlbum = [_musicPlayer getPlayingAlbumName];
         
         //取得歌曲播放時間總長度 ( Fetchs Song Length with Seconds. )
         CGFloat _playingTimeLength = [_musicPlayer getPlayingSongDuration];
@@ -111,7 +111,8 @@
     {
         // ... 
     }
-
+    
+    [self.musicPlayer awakePlayer];
 
 }
 
@@ -157,6 +158,22 @@
 -(IBAction)playMusic:(id)sender
 {
     [musicPlayer playSongWithPersistenId:@"persistenId of song."];
+}
+
+-(IBAction)fetchAllSongs:(id)sender
+{
+    NSLog(@"all songs : %@", [musicPlayer fetchAllSongs]);
+}
+
+-(IBAction)fetchAllAlbums:(id)sender
+{
+    NSLog(@"all albums : %@", [musicPlayer fetchAllAlbums]);
+}
+
+-(IBAction)fetchAlbumSongs:(id)sender
+{
+    NSNumber *_albumId = [NSNumber numberWithLongLong:[@"-843583648929542851" longLongValue]];
+    NSLog(@"取得指定專輯的所有歌曲 : %@", [musicPlayer fetchAlbumSongsWithAlbumId:_albumId]);
 }
 
 @end

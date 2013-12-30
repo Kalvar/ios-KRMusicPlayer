@@ -157,11 +157,27 @@ KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
 {
     [musicPlayer playSavedSongLists];
 }
+
+-(IBAction)fetchAllSongs:(id)sender
+{
+    NSLog(@"all songs : %@", [musicPlayer fetchAllSongs]);
+}
+
+-(IBAction)fetchAllAlbums:(id)sender
+{
+    NSLog(@"all albums : %@", [musicPlayer fetchAllAlbums]);
+}
+
+-(IBAction)fetchAlbumSongs:(id)sender
+{
+    NSNumber *_albumId = [NSNumber numberWithLongLong:[@"-843583648929542851" longLongValue]];
+    NSLog(@"取得指定專輯的所有歌曲 : %@", [musicPlayer fetchAlbumSongsWithAlbumId:_albumId]);
+}
 ```
 
 ## Version
 
-KRMusicPlayer now is V0.65 beta.
+KRMusicPlayer now is V0.7 beta.
 
 ## License
 

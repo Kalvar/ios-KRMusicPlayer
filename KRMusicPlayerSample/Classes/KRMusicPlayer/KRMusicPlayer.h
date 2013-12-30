@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.h
-//  V0.6.7 Beta
+//  V0.7.0 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013年 Kuo-Ming Lin. All rights reserved.
@@ -22,6 +22,8 @@
 @property (nonatomic, assign) BOOL isPlaying;
 @property (nonatomic, assign) BOOL isPause;
 @property (nonatomic, assign) BOOL isStop;
+//播放器是否已被喚醒準備好播音樂
+@property (nonatomic, assign) BOOL isPlayerWoke;
 @property (nonatomic, assign) CGFloat volume;
 
 // Posted when the playback state changes, either programatically or by the user.
@@ -42,6 +44,7 @@
 -(void)initialize;
 
 #pragma --mark Player
+-(void)preparedToPlay;
 -(void)play;
 -(void)playAndKeepNotifications;
 -(void)pause;
@@ -50,16 +53,42 @@
 -(void)nextSong;
 -(void)previousSong;
 -(void)turnToBegining;
--(NSString *)getPlayingSong;
--(NSString *)getPlayingAlbum;
+
+#pragma --mark Gets Infomation
+-(NSString *)getPlayingSongName;
+-(NSString *)getPlayingAlbumName;
 -(CGFloat)getPlayingSongDuration;
 -(CGFloat)getPlayingSongCurrentTime;
--(NSString *)getSonger;
+-(NSString *)getPlayingSonger;
+
+#pragma --mark Save Songs
 -(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId;
 -(BOOL)savePlaylistWithPersistentId:(NSString *)_persistenId songInfo:(NSDictionary *)_songInfo;
 -(void)playSavedSongLists;
 -(void)playSongWithPersistenId:(NSString *)_persistenId;
--(NSDictionary *)getSavedSongLists;
+-(NSDictionary *)fetchtSavedSongLists;
 -(void)turnOnRepeatMode;
 
+
 @end
+
+
+@interface KRMusicPlayer (PlayerFetchs)
+
+-(void)awakePlayer;
+-(NSArray *)fetchAllAlbums;
+-(NSArray *)fetchAllAlbumsWithinImageSize:(CGSize)_imageSize;
+-(NSArray *)fetchSongsWithQuery:(MPMediaQuery *)_query;
+-(NSArray *)fetchAlbumSongsWithAlbumId:(NSNumber *)_albumId;
+-(NSArray *)fetchAllSongs;
+
+@end
+
+
+@interface KRMusicPlayer (PlayerQueueQuery)
+
+-(void)setQueueWithQuery:(MPMediaQuery *)_mediaQuery;
+-(void)setQueueWithItemCollection:(MPMediaItemCollection *)_itemCollection;
+
+@end
+
