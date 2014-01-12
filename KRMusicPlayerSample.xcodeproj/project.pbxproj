@@ -288,10 +288,12 @@
 		8E4F493E17E36B3800BC0D0D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: KUO-MING LIN (LJ8A4ND325)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "KRMusicPlayerSample/KRMusicPlayerSample-Prefix.pch";
 				INFOPLIST_FILE = "KRMusicPlayerSample/KRMusicPlayerSample-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "45A4B2AB-4CFC-40ED-A339-02F478CE034A";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -299,10 +301,12 @@
 		8E4F493F17E36B3800BC0D0D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: KUO-MING LIN (LJ8A4ND325)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "KRMusicPlayerSample/KRMusicPlayerSample-Prefix.pch";
 				INFOPLIST_FILE = "KRMusicPlayerSample/KRMusicPlayerSample-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "45A4B2AB-4CFC-40ED-A339-02F478CE034A";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -326,6 +330,7 @@
 				8E4F493F17E36B3800BC0D0D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

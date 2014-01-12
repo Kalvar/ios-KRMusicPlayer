@@ -25,9 +25,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    musicPlayer = [KRMusicPlayer sharedManager];
-    //musicPlayer = [[KRMusicPlayer alloc] init];
+    musicPlayer = [KRMusicPlayer sharedPlayer];
     [self.musicPlayer initialize];
+    [self.musicPlayer awakePlayer];
     [self.musicPlayer setPlaybackChangeHandler:^(BOOL stop, MPMusicPlaybackState playbackState) {
         
         NSLog(@"setPlaybackChangeHandler : %i", playbackState);
@@ -51,11 +51,11 @@
                 
                 break;
             case MPMusicPlaybackStateSeekingForward:
-                //正向播放
+                //正向快轉播放
                 
                 break;
             case MPMusicPlaybackStateSeekingBackward:
-                //逆向播放
+                //逆向倒轉播放
                 
                 break;
             default:
@@ -68,7 +68,8 @@
     __weak UILabel *_outSongNameLabel   = outSongNameLabel;
     __weak UILabel *_outAlbumNameLabel  = outAlbumNameLabel;
     __weak UILabel *_outSongLengthLabel = outSongLengthLabel;
-    [self.musicPlayer setPlayingItemChangeHandler:^(NSString *itemPersistentId) {
+    [self.musicPlayer setPlayingItemChangeHandler:^(NSNumber *itemPersistentId, NSUInteger songIndex)
+    {
         
         NSLog(@"setPlayingItemChangeHandler : %@", itemPersistentId);
         
@@ -86,7 +87,7 @@
         [_outSongLengthLabel setText:[NSString stringWithFormat:@"%@", [[NSNumber numberWithFloat:_playingTimeLength] stringValue]]];
         
         //Save the Song that you can use [_musicPlayer playSavedSongLists] to play the saved songs.
-        [_musicPlayer savePlaylistWithPersistentId:itemPersistentId];
+        [_musicPlayer savePlaylistWithPersistentId:[itemPersistentId stringValue]];
         //You can use this method to get all saved songs.
         //NSDictionary *_savedSongs = [_musicPlayer getSavedSongLists];
         
@@ -111,8 +112,6 @@
     {
         // ... 
     }
-    
-    [self.musicPlayer awakePlayer];
 
 }
 
@@ -126,15 +125,15 @@
 -(IBAction)play:(id)sender
 {
     //播放音樂 ( Play Music )
-    if( musicPlayer.isStop || musicPlayer.isPause )
+    if( !musicPlayer.isPlaying )
     {
-        [musicPlayer play];
+        [musicPlayer play];        
     }
 }
 
 -(IBAction)stop:(id)sender
 {
-    //暫停播放 ( Pause Music )
+    //暫停播放 ( Pause Music can simulate Stop. )
     [musicPlayer pause];
 }
 
@@ -173,7 +172,7 @@
 -(IBAction)fetchAlbumSongs:(id)sender
 {
     NSNumber *_albumId = [NSNumber numberWithLongLong:[@"-843583648929542851" longLongValue]];
-    NSLog(@"取得指定專輯的所有歌曲 : %@", [musicPlayer fetchAlbumSongsWithAlbumId:_albumId]);
+    NSLog(@"取得指定專輯的所有歌曲 : %@", [musicPlayer fetchSongsWithAlbumId:_albumId]);
 }
 
 @end
