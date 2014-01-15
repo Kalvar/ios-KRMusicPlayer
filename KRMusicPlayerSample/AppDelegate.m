@@ -33,6 +33,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if (bgTask != UIBackgroundTaskInvalid)
             {
+                [app endBackgroundTask:bgTask];
                 bgTask = UIBackgroundTaskInvalid;
             }
         });
@@ -41,6 +42,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if (bgTask != UIBackgroundTaskInvalid)
             {
+                [app endBackgroundTask:bgTask];
                 bgTask = UIBackgroundTaskInvalid;
             }
         });
