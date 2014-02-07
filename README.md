@@ -177,7 +177,7 @@ KRMusicPlayer is using simple methods to control iPod Music Player of iOS.
 
 ## Version
 
-KRMusicPlayer now is V0.7 beta.
+KRMusicPlayer now is V0.8.6 beta.
 
 ## License
 

@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.m
-//  V0.8.5 Beta
+//  V0.8.6 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013 - 2014年 Kuo-Ming Lin. All rights reserved.
@@ -49,6 +49,11 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
     //Privates
     self._sliderTimer = nil;
     self._isNextSong  = NO;
+}
+
+-(NSString *)_formatedNullString:(id)_someValue
+{
+    return [_someValue isKindOfClass:[NSString class]] ? (NSString *)_someValue : @"";
 }
 
 @end
@@ -437,9 +442,14 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
         MPMediaItemArtwork *_artwork = [_eachAlbum valueForProperty:MPMediaItemPropertyArtwork];
         CGSize _theSize              = ( _isFullSize ) ? _artwork.bounds.size : _imageSize;
         UIImage *_albumImage         = [_artwork imageWithSize:_theSize]; //[_artwork imageWithSize:CGSizeMake(120.0f, 120.0f)];
+        id _artworkImage             = _albumImage;
+        if( !_albumImage )
+        {
+            _artworkImage = [NSNull null];
+        }
         NSDictionary *_albumInfo = @{kKRMusicPlayerAlbumIdentifier : _albumId,
-                                     kKRMusicPlayerAlbumName       : [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumTitle],
-                                     kKRMusicPlayerAlbumImage      : _albumImage};
+                                     kKRMusicPlayerAlbumName       : [self _formatedNullString:[_eachAlbum valueForProperty:MPMediaItemPropertyAlbumTitle]],
+                                     kKRMusicPlayerAlbumImage      : _artworkImage};
         [_albums addObject:_albumInfo];
         [_ignores setObject:_albumId forKey:_albumId];
     }
@@ -472,9 +482,9 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
          */
         NSDictionary *_songInfo = @{kKRMusicPlayerSongIdentifier  : [_eachSong valueForProperty:MPMediaItemPropertyPersistentID],
                                     kKRMusicPlayerSongName        : [_eachSong valueForProperty:MPMediaItemPropertyTitle],
-                                    kKRMusicPlayerSongerName      : [_eachSong valueForProperty:MPMediaItemPropertyAlbumArtist],
+                                    kKRMusicPlayerSongerName      : [self _formatedNullString:[_eachSong valueForProperty:MPMediaItemPropertyAlbumArtist]],
                                     kKRMusicPlayerAlbumIdentifier : [_eachSong valueForProperty:MPMediaItemPropertyAlbumPersistentID],
-                                    kKRMusicPlayerAlbumName       : [_eachSong valueForProperty:MPMediaItemPropertyAlbumTitle]};
+                                    kKRMusicPlayerAlbumName       : [self _formatedNullString:[_eachSong valueForProperty:MPMediaItemPropertyAlbumTitle]]};
         [_songs addObject:_songInfo];
     }
     return _songs;
@@ -519,7 +529,7 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
         //取得專輯圖片
         _songInfo = @{kKRMusicPlayerSongIdentifier : [_songItem valueForProperty:MPMediaItemPropertyPersistentID],
                       kKRMusicPlayerSongName       : [_songItem valueForProperty:MPMediaItemPropertyTitle],
-                      kKRMusicPlayerSongerName     : [_songItem valueForProperty:MPMediaItemPropertyAlbumArtist]};
+                      kKRMusicPlayerSongerName     : [self _formatedNullString:[_songItem valueForProperty:MPMediaItemPropertyAlbumArtist]]};
     }
     return _songInfo;
 }
@@ -545,10 +555,15 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
         MPMediaItemArtwork *_artwork = [_eachAlbum valueForProperty:MPMediaItemPropertyArtwork];
         CGSize _theSize              = ( _imageSize.width <= 0.0f || _imageSize.height <= 0.0f ) ? _artwork.bounds.size : _imageSize;
         UIImage *_albumImage         = [_artwork imageWithSize:_theSize];
+        id _artworkImage             = _albumImage;
+        if( !_albumImage )
+        {
+            _artworkImage = [NSNull null];
+        }
         _albumInfo = @{kKRMusicPlayerAlbumIdentifier : [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumPersistentID],
-                       kKRMusicPlayerAlbumName       : [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumTitle],
-                       kKRMusicPlayerAlbumImage      : _albumImage,
-                       kKRMusicPlayerSongerName      : [_eachAlbum valueForProperty:MPMediaItemPropertyAlbumArtist]};
+                       kKRMusicPlayerAlbumName       : [self _formatedNullString:[_eachAlbum valueForProperty:MPMediaItemPropertyAlbumTitle]],
+                       kKRMusicPlayerAlbumImage      : _artworkImage,
+                       kKRMusicPlayerSongerName      : [self _formatedNullString:[_eachAlbum valueForProperty:MPMediaItemPropertyAlbumArtist]]};
         break;
     }
     return _albumInfo;
@@ -812,7 +827,7 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
 //取得正在播放專輯
 -(NSString *)getPlayingAlbumName
 {
-    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle] : @"";
+    return [self _formatedNullString:[_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumTitle]];
 }
 
 //取得正在播放的歌曲總播放時間長度 ( 歌曲長度 ; 秒 )
@@ -847,7 +862,7 @@ const NSString *kKRMusicPlayerSongName        = @"songName";
 //取得演唱者
 -(NSString *)getPlayingSonger
 {
-    return [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumArtist] ? [_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumArtist] : @"";
+    return [self _formatedNullString:[_musicPlayer.nowPlayingItem valueForProperty:MPMediaItemPropertyAlbumArtist]];
 }
 
 #pragma --mark Saving Songs

@@ -1,6 +1,6 @@
 //
 //  KMusicPlayer.h
-//  V0.8.5 Beta
+//  V0.8.6 Beta
 //
 //  Created by Kalvar on 13/7/05.
 //  Copyright (c) 2013 - 2014年 Kuo-Ming Lin. All rights reserved.
